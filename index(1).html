@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Lab · 机器学习交互演示中心</title>
+<style>
+/* ============ 基础 ============ */
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:#EDF6FF}
+:root{
+  --ink:#1E2A38;
+  --ink-2:#53687C;
+  --ink-3:#8B9CAE;
+  --line:rgba(124,163,212,.22);
+  --glass:rgba(255,255,255,.58);
+  --glass-soft:rgba(255,255,255,.42);
+  --blue:#6FA8FF;
+  --mint:#5FD3BB;
+  --purple:#A98BF5;
+  --grad:linear-gradient(118deg,#6FA8FF 0%,#5FD3BB 52%,#A98BF5 100%);
+  --grad-soft:linear-gradient(118deg,rgba(111,168,255,.14),rgba(95,211,187,.14),rgba(169,139,245,.14));
+  --sh-sm:0 8px 22px -10px rgba(78,124,196,.30);
+  --sh-md:0 16px 38px -16px rgba(78,124,196,.36);
+  --sh-lg:0 26px 56px -22px rgba(78,124,196,.46);
+  --r-xl:28px;--r-lg:24px;--r-md:16px;--r-pill:999px;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Inter","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",system-ui,-apple-system,sans-serif;
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  overflow-x:hidden;
+  background:
+    radial-gradient(1100px 820px at 6% -12%, #D9ECFF 0%, rgba(217,236,255,0) 62%),
+    radial-gradient(900px 720px at 97% 2%, #DFF6ED 0%, rgba(223,246,237,0) 58%),
+    radial-gradient(1000px 900px at 52% 112%, #ECE4FF 0%, rgba(236,228,255,0) 62%),
+    linear-gradient(152deg,#EDF6FF 0%,#EAF8F4 48%,#F3EDFE 100%);
+  background-attachment:fixed;
+}
+::selection{background:rgba(111,168,255,.24)}
+.wrap{width:100%;max-width:1180px;margin:0 auto;padding:0 28px}
+
+/* ============ 背景光斑 ============ */
+.orb{position:fixed;border-radius:50%;filter:blur(60px);pointer-events:none;z-index:0}
+.orb-1{width:520px;height:520px;top:-160px;left:-120px;background:radial-gradient(circle,rgba(150,199,255,.55),rgba(150,199,255,0) 68%);animation:float1 18s ease-in-out infinite}
+.orb-2{width:560px;height:560px;top:180px;right:-180px;background:radial-gradient(circle,rgba(160,235,215,.5),rgba(160,235,215,0) 68%);animation:float2 22s ease-in-out infinite}
+.orb-3{width:600px;height:600px;bottom:-220px;left:38%;background:radial-gradient(circle,rgba(199,180,255,.45),rgba(199,180,255,0) 68%);animation:float1 26s ease-in-out infinite reverse}
+@keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(28px,-22px)}}
+@keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-26px,20px)}}
+
+/* ============ 导航 ============ */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.52);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid rgba(255,255,255,.7)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:70px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink)}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -8px rgba(95,150,220,.85)}
+.brand-mark svg{width:21px;height:21px;stroke:#fff}
+.brand-name{font-size:17.5px;font-weight:700;letter-spacing:.3px}
+.brand-name i{font-style:normal;font-weight:500;color:var(--ink-3);font-size:12px;margin-left:7px;letter-spacing:1.4px}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-links a{position:relative;padding:9px 18px;border-radius:var(--r-pill);font-size:14.5px;font-weight:500;color:var(--ink-2);text-decoration:none;border:1px solid transparent;transition:.26s}
+.nav-links a:hover{color:#3D74D6;background:rgba(255,255,255,.75);border-color:rgba(255,255,255,.9);box-shadow:var(--sh-sm)}
+.nav-links a.active{color:#3D74D6;background:rgba(255,255,255,.85);border-color:rgba(176,208,246,.6);box-shadow:var(--sh-sm)}
+
+/* ============ Hero ============ */
+.hero{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:74px 0 40px}
+.hero-badge{display:inline-flex;align-items:center;gap:9px;padding:8px 17px;border-radius:var(--r-pill);background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.9);box-shadow:var(--sh-sm);font-size:12.5px;font-weight:600;letter-spacing:1.1px;color:#4A82C8;backdrop-filter:blur(12px)}
+.hero-badge .pulse{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#6FA8FF,#5FD3BB);box-shadow:0 0 0 4px rgba(111,168,255,.18);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(111,168,255,.20)}50%{box-shadow:0 0 0 7px rgba(111,168,255,.06)}}
+.hero h1{margin-top:24px;font-size:clamp(34px,5.1vw,58px);line-height:1.22;font-weight:800;letter-spacing:-.5px;background:linear-gradient(112deg,#23384D 0%,#33668C 44%,#5E539E 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{margin-top:16px;font-size:clamp(15px,1.5vw,18.5px);color:var(--ink-2);letter-spacing:.4px}
+
+/* 搜索框 */
+.search{position:relative;display:flex;align-items:center;gap:12px;width:min(640px,100%);margin-top:34px;padding:0 18px;height:60px;border-radius:var(--r-pill);background:rgba(255,255,255,.76);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border:1px solid rgba(255,255,255,.95);box-shadow:var(--sh-md);transition:.3s}
+.search:focus-within{box-shadow:0 0 0 5px rgba(111,168,255,.15),var(--sh-lg);border-color:rgba(160,200,250,.85)}
+.search-ico{width:20px;height:20px;flex:none;stroke:#7A9BC4;stroke-width:2;fill:none;stroke-linecap:round}
+.search input{flex:1;border:none;outline:none;background:transparent;font-size:15.5px;color:var(--ink);font-family:inherit;letter-spacing:.2px}
+.search input::placeholder{color:#9FB2C6}
+.search kbd{font:inherit;font-size:11.5px;color:#8FA6BF;border:1px solid rgba(160,185,215,.55);border-radius:7px;padding:3px 8px;background:rgba(255,255,255,.7);line-height:1}
+.search-clear{flex:none;width:24px;height:24px;border-radius:50%;border:none;cursor:pointer;background:rgba(140,170,205,.16);color:#6C87A3;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;transition:.2s}
+.search-clear:hover{background:rgba(140,170,205,.3)}
+.search-clear[hidden]{display:none}
+.hero-meta{margin-top:18px;font-size:12.5px;color:var(--ink-3);letter-spacing:.6px}
+
+/* ============ 分类标签 ============ */
+.tabs-row{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:34px 0 26px}
+.tabs{display:flex;flex-wrap:wrap;gap:10px}
+.tab{padding:10px 21px;border-radius:var(--r-pill);font-size:14px;font-weight:500;color:var(--ink-2);background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.9);cursor:pointer;font-family:inherit;box-shadow:var(--sh-sm);transition:transform .24s cubic-bezier(.22,.8,.3,1),box-shadow .24s,color .24s,background .24s}
+.tab:hover{transform:translateY(-2px);color:#3D74D6;box-shadow:var(--sh-md)}
+.tab.active{color:#fff;background:var(--grad);border-color:transparent;box-shadow:0 14px 28px -14px rgba(95,150,220,.95)}
+.counter{font-size:13px;color:var(--ink-3);letter-spacing:.5px;padding-right:4px}
+.counter b{color:#4A82C8;font-weight:600}
+
+/* ============ 卡片网格 ============ */
+.grid{position:relative;z-index:1;display:grid;gap:22px;grid-template-columns:repeat(3,1fr);padding-bottom:20px}
+.card{
+  position:relative;display:flex;flex-direction:column;gap:13px;padding:24px 24px 20px;
+  border-radius:var(--r-xl);cursor:pointer;overflow:hidden;
+  background:var(--glass);
+  backdrop-filter:blur(20px) saturate(165%);-webkit-backdrop-filter:blur(20px) saturate(165%);
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:var(--sh-sm);
+  transition:transform .3s cubic-bezier(.22,.8,.3,1),box-shadow .3s,border-color .3s,background .3s;
+  animation:rise .5s cubic-bezier(.22,.8,.3,1) both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.card::before{content:"";position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.98),transparent)}
+.card::after{content:"";position:absolute;inset:auto -30% -60% -30%;height:150px;background:radial-gradient(ellipse at 50% 0%,var(--a-soft,rgba(111,168,255,.16)),transparent 70%);opacity:0;transition:opacity .35s;pointer-events:none}
+.card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);border-color:rgba(255,255,255,1);background:rgba(255,255,255,.7)}
+.card:hover::after{opacity:1}
+.card:focus-visible{outline:2px solid rgba(111,168,255,.75);outline-offset:3px}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.icon{width:50px;height:50px;border-radius:15px;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.9);transition:transform .3s}
+.card:hover .icon{transform:scale(1.06) rotate(-3deg)}
+.icon svg{width:25px;height:25px;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.level{font-size:11.5px;font-weight:700;letter-spacing:.6px;padding:5px 12px;border-radius:var(--r-pill);white-space:nowrap}
+.lv-1{color:#1D9B82;background:rgba(95,211,187,.18);border:1px solid rgba(95,211,187,.35)}
+.lv-2{color:#3D74D6;background:rgba(111,168,255,.16);border:1px solid rgba(111,168,255,.32)}
+.lv-3{color:#7A56D6;background:rgba(169,139,245,.18);border:1px solid rgba(169,139,245,.35)}
+.card h3{font-size:18.5px;font-weight:700;letter-spacing:.2px}
+.card p{font-size:13.8px;line-height:1.75;color:var(--ink-2);flex:1}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:4px;border-top:1px solid rgba(140,175,215,.18);margin-top:2px}
+.cat-chip{font-size:11.5px;font-weight:600;color:var(--ink-3);letter-spacing:.8px}
+.go{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#4278CE;padding:7px 14px;border-radius:var(--r-pill);background:rgba(111,168,255,.1);transition:background .3s,color .3s,box-shadow .3s}
+.go .arw{transition:transform .3s}
+.card:hover .go{color:#fff;background:var(--grad);box-shadow:0 10px 22px -10px rgba(95,150,220,.95)}
+.card:hover .go .arw{transform:translateX(3px)}
+
+/* 空状态 */
+.empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:76px 20px;border-radius:var(--r-xl);background:rgba(255,255,255,.45);border:1px dashed rgba(150,185,225,.55);backdrop-filter:blur(12px)}
+.empty .eico{font-size:30px}
+.empty p{color:var(--ink-2);font-size:14.5px}
+.empty span{color:var(--ink-3);font-size:13px}
+
+/* ============ 底部 ============ */
+.footer{position:relative;z-index:1;margin-top:46px;padding:34px 0 46px;text-align:center}
+.footer p{font-size:13px;color:var(--ink-3);letter-spacing:.7px}
+.footer p::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:linear-gradient(135deg,#6FA8FF,#5FD3BB);margin-right:9px;vertical-align:middle;opacity:.85}
+
+/* ============ 提示条 ============ */
+.toast{position:fixed;left:50%;bottom:40px;transform:translate(-50%,26px);z-index:200;display:flex;align-items:center;gap:10px;padding:13px 24px;border-radius:var(--r-pill);background:rgba(255,255,255,.86);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.95);box-shadow:var(--sh-lg);font-size:14px;color:var(--ink);opacity:0;pointer-events:none;transition:.34s cubic-bezier(.22,.8,.3,1)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ============ 弹窗 ============ */
+.mask{position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(210,226,244,.42);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:.3s}
+.mask.show{opacity:1;pointer-events:auto}
+.modal{width:min(470px,100%);padding:34px 34px 30px;border-radius:var(--r-xl);background:rgba(255,255,255,.86);backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.95);box-shadow:0 40px 80px -30px rgba(70,115,185,.55);transform:translateY(16px) scale(.97);transition:.34s cubic-bezier(.22,.8,.3,1)}
+.mask.show .modal{transform:none}
+.modal h2{font-size:21px;font-weight:750;margin-bottom:14px}
+.modal p{font-size:14.2px;line-height:1.9;color:var(--ink-2)}
+.modal p+p{margin-top:11px}
+.modal .close{margin-top:24px;width:100%;height:46px;border:none;border-radius:var(--r-pill);background:var(--grad);color:#fff;font-size:14.5px;font-weight:600;font-family:inherit;cursor:pointer;box-shadow:0 14px 28px -12px rgba(95,150,220,.95);transition:transform .24s,box-shadow .24s}
+.modal .close:hover{transform:translateY(-2px);box-shadow:0 20px 34px -14px rgba(95,150,220,1)}
+
+/* ============ 页面过渡遮罩（跳转不白屏） ============ */
+.veil{position:fixed;inset:0;z-index:999;pointer-events:none;opacity:0;transition:opacity .3s ease;
+  background:
+    radial-gradient(1100px 820px at 6% -12%, #D9ECFF 0%, rgba(217,236,255,0) 62%),
+    radial-gradient(900px 720px at 97% 2%, #DFF6ED 0%, rgba(223,246,237,0) 58%),
+    radial-gradient(1000px 900px at 52% 112%, #ECE4FF 0%, rgba(236,228,255,0) 62%),
+    linear-gradient(152deg,#EDF6FF 0%,#EAF8F4 48%,#F3EDFE 100%)}
+.veil.on{opacity:1}
+
+/* ============ 响应式 ============ */
+@media(max-width:1023px){
+  .grid{grid-template-columns:repeat(2,1fr);gap:20px}
+}
+@media(max-width:680px){
+  .wrap{padding:0 18px}
+  .grid{grid-template-columns:1fr;gap:16px}
+  .hero{padding:52px 0 26px}
+  .search{height:54px;padding:0 15px}
+  .search kbd{display:none}
+  .brand-name i{display:none}
+  .nav-links a{padding:8px 13px;font-size:13.5px}
+  .tabs-row{margin:26px 0 20px}
+  .tab{padding:9px 16px;font-size:13.2px}
+  .card{padding:21px 20px 17px;border-radius:24px}
+  .counter{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- 页面过渡遮罩：跳转时遮住白屏 -->
+<div class="veil on" id="veil"></div>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- ================= 顶部导航 ================= -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="5" cy="6" r="2"/><circle cx="5" cy="18" r="2"/>
+          <circle cx="12" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/>
+          <path d="M6.8 7.2 10.4 11M6.8 16.8 10.4 13M13.6 11l3.6-3.8M13.6 13l3.6 3.8"/>
+        </svg>
+      </span>
+      <span class="brand-name">ML Lab<i>MACHINE LEARNING</i></span>
+    </a>
+    <nav class="nav-links">
+      <a href="index.html" class="active">首页</a>
+      <a href="#" id="aboutBtn">关于</a>
+      <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ================= Hero ================= -->
+  <section class="hero wrap">
+    <div class="hero-badge"><span class="pulse"></span>交互式机器学习 · 可视化实验室</div>
+    <h1>机器学习交互演示中心</h1>
+    <p class="hero-sub">用可视化理解每一个算法</p>
+
+    <div class="search">
+      <svg class="search-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      <input id="search" type="text" placeholder="搜索算法，如 SVM、K-means" autocomplete="off" spellcheck="false">
+      <button class="search-clear" id="clearBtn" type="button" hidden aria-label="清空">×</button>
+      <kbd>/</kbd>
+    </div>
+    <div class="hero-meta">共 10 个算法演示 · 全部在浏览器本地运行，数据无需上传</div>
+  </section>
+
+  <!-- ================= 分类标签 ================= -->
+  <section class="wrap tabs-row">
+    <div class="tabs" id="tabs"></div>
+    <div class="counter" id="counter"></div>
+  </section>
+
+  <!-- ================= 卡片网格 ================= -->
+  <section class="wrap">
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<!-- ================= 底部 ================= -->
+<footer class="footer">
+  <p>更多机器学习算法的交互演示正在开发中</p>
+</footer>
+
+<!-- ================= 提示条 ================= -->
+<div class="toast" id="toast"><span id="toastText"></span></div>
+
+<!-- ================= 关于弹窗 ================= -->
+<div class="mask" id="mask">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2>关于 ML Lab</h2>
+    <p>这是一个用于学习机器学习的交互演示中心。每个算法都配有可以直接上手操作的图形界面，你可以拖动参数、观察数据变化，把课本上的公式变成看得见的图形。</p>
+    <p>页面采用纯前端实现，所有计算都在你的浏览器里完成，数据也保存在本地，不依赖任何服务器。</p>
+    <button class="close" id="closeModal">开始探索</button>
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   本地数据源：算法列表（无需后端，全部内联在页面中）
+   level: 1 入门 / 2 进阶 / 3 高级
+   ========================================================== */
+const LEVELS = {
+  1: { text:'入门', cls:'lv-1' },
+  2: { text:'进阶', cls:'lv-2' },
+  3: { text:'高级', cls:'lv-3' }
+};
+
+const ICONS = {
+  eval:'<path d="M4 19.5V11M9.3 19.5V5M14.7 19.5v-6M20 19.5V7.5"/><path d="M3 21h18"/>',
+  linreg:'<circle cx="5" cy="16.5" r="1.5"/><circle cx="10" cy="12" r="1.5"/><circle cx="14.5" cy="13.5" r="1.5"/><circle cx="19" cy="7" r="1.5"/><path d="M3.6 18.6 20.4 5.4"/>',
+  logistic:'<circle cx="4.5" cy="18" r="1.4"/><circle cx="8" cy="17" r="1.4"/><circle cx="16" cy="7" r="1.4"/><circle cx="19.5" cy="6" r="1.4"/><path d="M3 18.6c4.6 0 5.2-13.2 9-13.2s4.4 13.2 9 13.2"/>',
+  tree:'<circle cx="12" cy="4" r="2.1"/><circle cx="6" cy="12" r="2.1"/><circle cx="18" cy="12" r="2.1"/><circle cx="3.4" cy="20" r="1.7"/><circle cx="9" cy="20" r="1.7"/><path d="M11 5.6 6.9 10.3M13 5.6l4.1 4.7M5.4 13.7 4 18.3M6.8 13.8l1.6 4.3"/>',
+  mlp:'<circle cx="4" cy="6.5" r="1.9"/><circle cx="4" cy="12" r="1.9"/><circle cx="4" cy="17.5" r="1.9"/><circle cx="12" cy="9" r="1.9"/><circle cx="12" cy="15" r="1.9"/><circle cx="20" cy="6.5" r="1.9"/><circle cx="20" cy="17.5" r="1.9"/><path d="M5.6 7.6 10.4 8.6M5.6 11.7 10.4 9.7M5.6 12.4 10.4 14.3M5.6 16.4 10.4 15.2M13.6 8.7l4.8-1.5M13.6 15.3l4.8 1.5M13.6 12h4.8"/>',
+  svm:'<circle cx="5.5" cy="7" r="1.8"/><circle cx="9" cy="5" r="1.8"/><circle cx="6" cy="11.2" r="1.8"/><circle cx="15.6" cy="17.4" r="1.8"/><circle cx="18.8" cy="15" r="1.8"/><circle cx="15.8" cy="20.2" r="1.8"/><path d="M4.6 16.4 19.4 6.6"/><path d="M2.6 15.2 17.4 5.4" stroke-dasharray="2.2 2.6" opacity=".6"/><path d="M6.6 21.4 21.4 11.6" stroke-dasharray="2.2 2.6" opacity=".6"/>',
+  bayes:'<path d="M3 19.6h18"/><path d="M3.4 19.2c3.6 0 3.9-11.4 8.6-11.4s5 11.4 8.6 11.4"/>',
+  ensem:'<path d="M12 3.2 20 7.3l-8 4.1L4 7.3l8-4.1Z"/><path d="M4 12.2l8 4.1 8-4.1"/><path d="M4 16.9l8 4.1 8-4.1"/>',
+  kmeans:'<circle cx="7" cy="7.2" r="2.3"/><circle cx="4.8" cy="12.4" r="1.9"/><circle cx="10.6" cy="10.6" r="1.9"/><circle cx="17.4" cy="16.4" r="2.3"/><circle cx="19.4" cy="11" r="1.9"/><circle cx="14" cy="19" r="1.9"/>',
+  pca:'<path d="M9.4 3.2H4v5.2M14.6 3.2H20v5.2M9.4 20.8H4v-5.2M14.6 20.8H20v-5.2"/><circle cx="12" cy="12" r="2.7"/>'
+};
+
+const ALGOS = [
+  { name:'模型评估',    desc:'学习性能指标、交叉验证与 ROC 曲线',      level:1, cats:['基础'],        icon:'eval',
+    kw:'评估 指标 准确率 精确率 召回率 混淆矩阵 交叉验证 ROC AUC F1 evaluation metrics',
+    href:null, accent:'#5B8DEF' },
+
+  { name:'线性回归',    desc:'用一条直线拟合数据趋势',                level:1, cats:['基础'],        icon:'linreg',
+    kw:'线性回归 拟合 最小二乘 直线 回归 linear regression least squares',
+    href:'linreg.html', accent:'#4FC3A1' },
+
+  { name:'Logistic 回归', desc:'理解分类问题与决策边界',              level:1, cats:['分类','基础'],  icon:'logistic',
+    kw:'逻辑回归 对数几率 sigmoid 分类 决策边界 logistic regression',
+    href:'logistic.html', accent:'#6FA8FF' },
+
+  { name:'决策树',      desc:'一层层分裂，直到判断清晰',              level:1, cats:['分类'],        icon:'tree',
+    kw:'决策树 信息熵 基尼系数 ID3 C4.5 CART 分裂 decision tree',
+    href:'dtree.html', accent:'#F2A057' },
+
+  { name:'神经网络',    desc:'探索多层感知机与反向传播',              level:2, cats:['分类','基础'],  icon:'mlp',
+    kw:'神经网络 多层感知机 反向传播 激活函数 梯度下降 感知机 BP neural network MLP backpropagation',
+    href:'nn.html', accent:'#A98BF5' },
+
+  { name:'支持向量机',  desc:'找到最宽的那条分界线',                  level:2, cats:['分类'],        icon:'svm',
+    kw:'支持向量机 间隔 核函数 超平面 SVM support vector machine margin kernel',
+    href:'svm.html', accent:'#5B8DEF' },
+
+  { name:'朴素贝叶斯',  desc:'学习贝叶斯决策论与分类器原理',          level:1, cats:['分类'],        icon:'bayes',
+    kw:'朴素贝叶斯 先验 后验 条件概率 贝叶斯 分类器 Naive Bayes',
+    href:null, accent:'#4EC5E8' },
+
+  { name:'集成学习',    desc:'理解 Bagging 与 Boosting',              level:2, cats:['集成学习','分类'], icon:'ensem',
+    kw:'集成学习 Bagging Boosting 随机森林 AdaBoost GBDT 投票 ensemble',
+    href:null, accent:'#4FC3A1' },
+
+  { name:'聚类分析',    desc:'可视化 K-means 等无监督算法',           level:1, cats:['聚类'],        icon:'kmeans',
+    kw:'聚类 K-means kmeans 均值 质心 无监督 肘部法 DBSCAN clustering',
+    href:'kmeans.html', accent:'#F27C9B' },
+
+  { name:'降维技术',    desc:'探索 PCA 等降维方法',                   level:2, cats:['降维'],        icon:'pca',
+    kw:'降维 PCA 主成分分析 特征值 方差 投影 降维技术 dimensionality reduction',
+    href:null, accent:'#8B7BEA' }
+];
+
+const CATS = ['全部','基础','分类','聚类','降维','集成学习'];
+
+/* ==========================================================
+   状态
+   ========================================================== */
+let activeCat = '全部';
+let keyword = '';
+
+/* ==========================================================
+   渲染
+   ========================================================== */
+const gridEl = document.getElementById('grid');
+const tabsEl = document.getElementById('tabs');
+const counterEl = document.getElementById('counter');
+const searchEl = document.getElementById('search');
+const clearBtn = document.getElementById('clearBtn');
+
+function filterAlgos(){
+  const q = keyword.trim().toLowerCase();
+  return ALGOS.filter(function(a){
+    if(activeCat !== '全部' && a.cats.indexOf(activeCat) === -1) return false;
+    if(!q) return true;
+    const hay = (a.name + ' ' + a.desc + ' ' + a.cats.join(' ') + ' ' + a.kw).toLowerCase();
+    return hay.indexOf(q) !== -1;
+  });
+}
+
+function renderTabs(){
+  tabsEl.innerHTML = CATS.map(function(c){
+    return '<button type="button" class="tab' + (c === activeCat ? ' active' : '') + '" data-cat="' + c + '">' + c + '</button>';
+  }).join('');
+}
+
+function cardHTML(a, i){
+  const lv = LEVELS[a.level];
+  return '' +
+  '<article class="card" tabindex="0" role="button" data-name="' + a.name + '" style="animation-delay:' + (i * 45) + 'ms;--a:' + a.accent + '">' +
+    '<div class="card-top">' +
+      '<span class="icon" style="background:' + a.accent + '1F;color:' + a.accent + '">' +
+        '<svg viewBox="0 0 24 24" stroke="currentColor">' + ICONS[a.icon] + '</svg>' +
+      '</span>' +
+      '<span class="level ' + lv.cls + '">' + lv.text + '</span>' +
+    '</div>' +
+    '<h3>' + a.name + '</h3>' +
+    '<p>' + a.desc + '</p>' +
+    '<div class="card-foot">' +
+      '<span class="cat-chip">' + a.cats.join(' · ') + '</span>' +
+      '<span class="go">进入演示 <span class="arw">→</span></span>' +
+    '</div>' +
+  '</article>';
+}
+
+function render(){
+  const list = filterAlgos();
+  if(list.length === 0){
+    gridEl.innerHTML =
+      '<div class="empty">' +
+        '<div class="eico">🔍</div>' +
+        '<p>没有找到匹配的算法</p>' +
+        '<span>换个关键词试试，比如「回归」、「聚类」、「SVM」</span>' +
+      '</div>';
+  } else {
+    gridEl.innerHTML = list.map(cardHTML).join('');
+  }
+  counterEl.innerHTML = '显示 <b>' + list.length + '</b> / ' + ALGOS.length + ' 个演示';
+}
+
+/* ==========================================================
+   交互
+   ========================================================== */
+tabsEl.addEventListener('click', function(e){
+  const btn = e.target.closest('.tab');
+  if(!btn) return;
+  activeCat = btn.dataset.cat;
+  renderTabs();
+  render();
+});
+
+searchEl.addEventListener('input', function(){
+  keyword = searchEl.value;
+  clearBtn.hidden = keyword.length === 0;
+  render();
+});
+
+clearBtn.addEventListener('click', function(){
+  searchEl.value = '';
+  keyword = '';
+  clearBtn.hidden = true;
+  searchEl.focus();
+  render();
+});
+
+document.addEventListener('keydown', function(e){
+  if(e.key === '/' && document.activeElement !== searchEl){
+    e.preventDefault();
+    searchEl.focus();
+  }
+  if(e.key === 'Escape'){
+    if(!mask.classList.contains('show')) return;
+    closeAbout();
+  }
+});
+
+gridEl.addEventListener('click', function(e){
+  const card = e.target.closest('.card');
+  if(card) openDemo(card.dataset.name);
+});
+
+gridEl.addEventListener('keydown', function(e){
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const card = e.target.closest('.card');
+  if(!card) return;
+  e.preventDefault();
+  openDemo(card.dataset.name);
+});
+
+function openDemo(name){
+  const a = ALGOS.find(function(x){ return x.name === name; });
+  if(!a) return;
+  if(a.href){
+    navigateTo(a.href);          // 先淡出再跳转，不白屏
+  } else {
+    showToast('该演示正在开发中');
+  }
+}
+
+/* 提示条 */
+const toastEl = document.getElementById('toast');
+const toastText = document.getElementById('toastText');
+let toastTimer = null;
+function showToast(msg){
+  toastText.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+}
+
+/* 关于弹窗 */
+const mask = document.getElementById('mask');
+document.getElementById('aboutBtn').addEventListener('click', function(e){
+  e.preventDefault();
+  mask.classList.add('show');
+});
+document.getElementById('closeModal').addEventListener('click', closeAbout);
+mask.addEventListener('click', function(e){ if(e.target === mask) closeAbout(); });
+function closeAbout(){ mask.classList.remove('show'); }
+
+/* ==========================================================
+   页面过渡：离开时淡出、进入时淡入，避免跳转白屏
+   ========================================================== */
+const veil = document.getElementById('veil');
+const reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const CUR = (location.pathname.split('/').pop() || 'index.html');
+
+function reveal(){
+  if(!veil.classList.contains('on')) return;
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ veil.classList.remove('on'); });
+  });
+}
+reveal();
+window.addEventListener('load', reveal);
+window.addEventListener('pageshow', function(e){ if(e.persisted) veil.classList.remove('on'); });
+
+function navigateTo(url){
+  if(reduced){ location.href = url; return; }
+  veil.classList.add('on');
+  setTimeout(function(){ location.href = url; }, 240);
+}
+
+/* 拦截站内 .html 链接，统一走淡出 → 淡入 */
+document.addEventListener('click', function(e){
+  if(e.defaultPrevented || e.button !== 0) return;
+  if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = e.target.closest && e.target.closest('a[href]');
+  if(!a || a.target === '_blank') return;
+  const href = a.getAttribute('href') || '';
+  if(!/\.html($|[?#])/i.test(href)) return;
+  e.preventDefault();
+  const file = href.split('#')[0].split('?')[0].split('/').pop();
+  if(file === CUR){ window.scrollTo({ top:0, behavior:'smooth' }); return; }
+  navigateTo(href);
+});
+
+/* 初始化 */
+renderTabs();
+render();
+</script>
+</body>
+</html>
